@@ -1,5 +1,7 @@
 # impede
 
+[![Build Status](https://travis-ci.com/westrik/impede.svg?token=zgPt6dWpztphELfxtxey&branch=master)](https://travis-ci.com/westrik/impede)
+
 A distributed<sup>\*</sup> functional physically-based<sup>\*</sup> renderer.
 
 <sub><sup>\*</sup> [workin' on it](TODO.md)</sub>
