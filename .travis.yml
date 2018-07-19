@@ -24,5 +24,4 @@ addons:
     - ghc-7.10.2
 
 install:
-  - travis_wait stack --no-terminal build
-  - travis_wait stack --no-terminal --skip-ghc-check test --only-snapshot
+  - travis_wait stack --no-terminal test
