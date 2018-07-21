@@ -11,7 +11,7 @@ instance Num Vector where
     (-) a b = Vector (x a - x b) (y a - y b) (z a - z b) 
     abs a = Vector (abs $ x a) (abs $ y a) (abs $ z a)
     fromInteger a = Vector v v v where v = fromIntegral a
-    signum a = 0
+    signum a = 0*a
 
 scale :: Vector -> Double -> Vector
 scale vec distance = Vector (x vec * distance) (y vec * distance) (z vec * distance)

@@ -8,6 +8,10 @@ A distributed<sup>\*</sup> functional physically-based<sup>\*</sup> renderer.
 
 ## do the thing
 ```
+brew install llvm@5
+# GHC wants LLVM stuff to be in /usr/bin/
+sudo ln -s /usr/local/Cellar/llvm@5/5.0.2/bin/llc /usr/bin/llc
+sudo ln -s /usr/local/Cellar/llvm@5/5.0.2/bin/opt /usr/bin/opt 
 stack build
 stack exec impede test.png
 ```

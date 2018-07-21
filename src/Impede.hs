@@ -9,8 +9,6 @@ import Codec.Picture
 
 import Vector
 import Ray
-import Colour
-import Image
 
 data SceneConfig = SceneConfig { width :: Int
                                , height :: Int
@@ -31,18 +29,18 @@ render conf = ImageRGB8 (generateImage (renderPixel conf) (width conf) (height c
 -- getPixel :: REPA Colour -> Int -> Int -> PixelRGB8
 
 renderPixel :: SceneConfig -> Int -> Int -> PixelRGB8
-renderPixel conf x y = getColour $ Ray (origin conf) direction
+renderPixel conf i j = getColour $ Ray (origin conf) direction
     where direction = lowerLeft conf + scale (horizontal conf) u + scale (vertical conf) v
-          u = fromIntegral x / fromIntegral (width conf)
-          v = fromIntegral y / fromIntegral (height conf)
+          u = fromIntegral i / fromIntegral (width conf)
+          v = fromIntegral j / fromIntegral (height conf)
 
 getColour :: Ray -> PixelRGB8
 getColour ray = if hitSphere (Vector 0 0 (-1)) 0.5 ray 
                     then PixelRGB8 255 0 0 
                     else normal
     where normal = PixelRGB8 127 178 255 -- (1 - t) * PixelRGB8 255 255 255 + t * PixelRGB8 127 178 255 
-          unitDir = unitVector (dir ray)
-          t = 0.5 * (y unitDir + 1)
+          -- unitDir = unitVector (dir ray)
+          -- t = 0.5 * (y unitDir + 1)
 
 hitSphere :: Vector -> Double -> Ray -> Bool
 hitSphere centre radius ray = discriminant > 0

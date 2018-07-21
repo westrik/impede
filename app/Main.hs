@@ -2,7 +2,6 @@ module Main where
 
 import Impede
 import Codec.Picture
-import Control.Monad
 import System.Environment (getArgs)
 
 main :: IO ()
