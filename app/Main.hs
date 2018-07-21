@@ -1,21 +1,19 @@
 module Main where
 
-import Lib
+import Impede
+import Ray
 import Codec.Picture
 import Control.Monad
-import Control.Monad.ST
-import Data.Array.Repa (Array, DIM1, DIM2, U, D, Z (..), (:.)(..), (!))
 import System.Environment (getArgs)
-import qualified Codec.Picture.Types as M
-import qualified Data.Array.Repa     as R -- for Repa
 
 main :: IO ()
 main = do
+  let sceneConfig = SceneConfig { width = 200
+                                , height = 100 
+                                , lower_left = Vector(-2, -1, -1)
+                                , horizontal = Vector(4, 0, 0)
+                                , vertical = Vector(0, 2, 0)
+                                , origin = Vector(0, 0, 0)
+                                }
   [path] <- getArgs
-  savePngImage path generateImg
-
-generateImg :: DynamicImage
-generateImg = ImageRGB8 (generateImage originalFnc 1200 1200)
-
-originalFnc :: Int -> Int -> PixelRGB8
-originalFnc x y = PixelRGB8 0 0 0
+  savePngImage path $ render sceneConfig
