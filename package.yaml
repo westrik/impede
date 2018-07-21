@@ -25,7 +25,10 @@ dependencies:
 - vector
 
 library:
-  source-dirs: src
+  source-dirs: 
+  - src
+  - src/geometry
+  - src/output
 
 executables:
   impede:
