@@ -39,6 +39,11 @@ executables:
     - -rtsopts
     - -with-rtsopts=-N
     - -fllvm
+    - -optlo-O3 
+    - -Odph 
+    - -fno-liberate-case
+    - -funfolding-use-threshold100 
+    - -funfolding-keeness-factor100
     - -Wall 
     - -Werror
     dependencies:

@@ -14,4 +14,5 @@ main = do
                                 , origin = Vector 0 0 0
                                 }
   [path] <- getArgs
-  savePngImage path $ render sceneConfig
+  image <- render sceneConfig
+  savePngImage path image

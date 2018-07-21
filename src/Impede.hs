@@ -1,3 +1,5 @@
+{-# LANGUAGE TypeOperators #-}
+
 module Impede
     ( Vector (..)
     , SceneConfig (..)
@@ -6,9 +8,17 @@ module Impede
     ) where
 
 import Codec.Picture
+import Control.Monad
+import Control.Monad.ST
+import Data.Array.Repa (Array, DIM1, DIM2, D, Z (..), (:.)(..), (!))
+import qualified Codec.Picture.Types as M
+import qualified Data.Array.Repa     as R -- for Repa
+import Data.Array.Repa.Repr.Vector
+
 
 import Vector
 import Ray
+import Colour
 
 data SceneConfig = SceneConfig { width :: Int
                                , height :: Int
@@ -18,28 +28,31 @@ data SceneConfig = SceneConfig { width :: Int
                                , origin :: Vector
                                } deriving (Show)  
 
-render :: SceneConfig -> DynamicImage
-render conf = ImageRGB8 (generateImage (renderPixel conf) (width conf) (height conf))
+render :: SceneConfig -> IO (DynamicImage)
+render conf = do
+    image <- R.computeP $ renderScene conf
+    return $ ImageRGB8 $ toImage image
 
--- TODO: rewrite this to allocate a matrix then run rendering in parallel on the matrix
+renderScene :: SceneConfig -> Array D DIM2 Colour
+renderScene conf = R.fromFunction (Z :. width conf :. height conf) (renderPixel conf)
 
--- renderScene :: SceneConfig -> REPA Colour
--- render config = parallel_map (renderPixel config) (REPA (width config) (height config))
-
--- getPixel :: REPA Colour -> Int -> Int -> PixelRGB8
-
-renderPixel :: SceneConfig -> Int -> Int -> PixelRGB8
-renderPixel conf i j = getColour $ Ray (origin conf) direction
+renderPixel :: SceneConfig -> DIM2 -> Colour
+renderPixel conf (Z :. i :. j) = getColour $ Ray (origin conf) direction
     where direction = lowerLeft conf + scale (horizontal conf) u + scale (vertical conf) v
           u = fromIntegral i / fromIntegral (width conf)
           v = fromIntegral j / fromIntegral (height conf)
 
-getColour :: Ray -> PixelRGB8
+toImage :: Array V DIM2 Colour -> Image PixelRGB8
+toImage a = generateImage gen width height
+    where Z :. width :. height = R.extent a
+          gen x y = pixel $ a ! (Z :. x :. y)
+
+getColour :: Ray -> Colour
 getColour ray = if hitSphere (Vector 0 0 (-1)) 0.5 ray 
-                    then PixelRGB8 255 0 0 
-                    else PixelRGB8 127 178 255 -- (1 - t) * PixelRGB8 255 255 255 + t * PixelRGB8 127 178 255 
+    then Colour 1 0 0 
+    else Colour 0.5 0.7 1 -- (1 - t) * PixelRGB8 255 255 255 + t * PixelRGB8 127 178 255 
     -- where unitDir = unitVector (dir ray)
-          -- t = 0.5 * (y unitDir + 1)
+        -- t = 0.5 * (y unitDir + 1)
 
 hitSphere :: Vector -> Double -> Ray -> Bool
 hitSphere centre radius ray = discriminant > 0
