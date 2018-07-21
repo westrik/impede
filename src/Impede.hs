@@ -37,9 +37,8 @@ renderPixel conf i j = getColour $ Ray (origin conf) direction
 getColour :: Ray -> PixelRGB8
 getColour ray = if hitSphere (Vector 0 0 (-1)) 0.5 ray 
                     then PixelRGB8 255 0 0 
-                    else normal
-    where normal = PixelRGB8 127 178 255 -- (1 - t) * PixelRGB8 255 255 255 + t * PixelRGB8 127 178 255 
-          -- unitDir = unitVector (dir ray)
+                    else PixelRGB8 127 178 255 -- (1 - t) * PixelRGB8 255 255 255 + t * PixelRGB8 127 178 255 
+    -- where unitDir = unitVector (dir ray)
           -- t = 0.5 * (y unitDir + 1)
 
 hitSphere :: Vector -> Double -> Ray -> Bool
