@@ -1,5 +1,5 @@
 module Impede
-    ( Vector(..)
+    ( Vector (..)
     , SceneConfig (..)
     
     , render
@@ -9,32 +9,40 @@ import Codec.Picture
 
 import Vector
 import Ray
-
-type Scalar = Double
+import Colour
+import Image
 
 data SceneConfig = SceneConfig { width :: Int
                                , height :: Int
-                               , lower_left :: Vector
+                               , lowerLeft :: Vector
                                , horizontal :: Vector
                                , vertical :: Vector
                                , origin :: Vector
                                } deriving (Show)  
 
 render :: SceneConfig -> DynamicImage
-render config = ImageRGB8 (generateImage (renderPixel config) (width config) (height config))
+render conf = ImageRGB8 (generateImage (renderPixel conf) (width conf) (height conf))
+
+-- TODO: rewrite this to allocate a matrix then run rendering in parallel on the matrix
+
+-- renderScene :: SceneConfig -> REPA Colour
+-- render config = parallel_map (renderPixel config) (REPA (width config) (height config))
+
+-- getPixel :: REPA Colour -> Int -> Int -> PixelRGB8
 
 renderPixel :: SceneConfig -> Int -> Int -> PixelRGB8
-renderPixel config x y = getColour $ Ray (origin config) direction
-    where direction = (lower_left config) + scale (horizontal config) u + scale (vertical config) v
-          u = (fromIntegral x) / fromIntegral (width config)
-          v = (fromIntegral y) / fromIntegral (height config)
+renderPixel conf x y = getColour $ Ray (origin conf) direction
+    where direction = (lowerLeft conf) + scale (horizontal conf) u + scale (vertical conf) v
+          u = (fromIntegral x) / fromIntegral (width conf)
+          v = (fromIntegral y) / fromIntegral (height conf)
 
 getColour :: Ray -> PixelRGB8
-getColour ray = if (hitSphere (Vector 0 0 (-1)) 0.5 ray)
-    then PixelRGB8 255 0 0 
-    else PixelRGB8 127 178 255 
+getColour ray = if (hitSphere (Vector 0 0 (-1)) 0.5 ray) then PixelRGB8 255 0 0 else normal
+    where normal = PixelRGB8 127 178 255 -- (1 - t) * PixelRGB8 255 255 255 + t * PixelRGB8 127 178 255 
+          unitDirection = unitVector (dir ray)
+          t = 0.5 * (y unitDirection + 1)
 
-hitSphere :: Vector -> Scalar -> Ray -> Bool
+hitSphere :: Vector -> Double -> Ray -> Bool
 hitSphere centre radius ray = discriminant > 0
     where discriminant = b * b - 4 * a * c
           oc = orig ray - centre

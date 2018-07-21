@@ -16,14 +16,14 @@ instance Num Vector where
 scale :: Vector -> Double -> Vector
 scale vec distance = Vector (x vec * distance) (y vec * distance) (z vec * distance)
 
-unit_vector :: Vector -> Vector
-unit_vector a = scale a (1/len a)
+unitVector :: Vector -> Vector
+unitVector a = scale a (1/len a)
 
-squared_len :: Vector -> Double
-squared_len a = (x a * x a) + (y a * y a) + (z a * z a)
+squaredLen :: Vector -> Double
+squaredLen a = (x a * x a) + (y a * y a) + (z a * z a)
 
 len :: Vector -> Double
-len = sqrt . squared_len
+len = sqrt . squaredLen
 
 dot :: Vector -> Vector -> Double
 dot a b = (x a * x b) + (y a * y b) + (z a * z b)

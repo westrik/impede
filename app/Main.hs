@@ -7,9 +7,9 @@ import System.Environment (getArgs)
 
 main :: IO ()
 main = do
-  let sceneConfig = SceneConfig { width = 1920
-                                , height = 1080
-                                , lower_left = Vector (-2) (-1) (-1)
+  let sceneConfig = SceneConfig { width = 200
+                                , height = 100
+                                , lowerLeft = Vector (-2) (-1) (-1)
                                 , horizontal = Vector 4 0 0
                                 , vertical = Vector 0 2 0
                                 , origin = Vector 0 0 0
