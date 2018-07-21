@@ -17,3 +17,7 @@ instance Num Colour where
 
 pixel :: Colour -> PixelRGB8
 pixel a = PixelRGB8 (round $ r a * 255) (round $ g a * 255) (round $ b a * 255)
+{-# INLINE pixel #-}
+
+scaleColour :: Colour -> Double -> Colour
+scaleColour col fac = Colour (r col * fac) (g col * fac) (b col * fac)
