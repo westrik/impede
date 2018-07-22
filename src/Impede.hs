@@ -48,14 +48,18 @@ toImage a = generateImage gen width height
           {-# INLINE gen #-}
 
 getColour :: Ray -> Colour
-getColour ray = if hitSphere (Vector 0 0 (-1)) 0.5 ray 
-    then Colour 1 0 0 
-    else scaleColour (Colour 1 1 1) (1 - t) + scaleColour (Colour 0.5 0.7 1) t
-    where t = 0.5 * (y unitDir + 1)
+getColour ray = if t > 0
+    then scaleColour (Colour (x n + 1) (y n + 1) (z n + 1)) 0.5
+    else scaleColour (Colour 1 1 1) (1 - t_) + scaleColour (Colour 0.5 0.7 1) t_
+    where t = hitSphere (Vector 0 0 (-1)) 0.5 ray 
+          n = unitVector (point ray t) - Vector 0 0 (-1)
+          t_ = 0.5 * (y unitDir + 1)
           unitDir = unitVector (dir ray)
 
-hitSphere :: Vector -> Double -> Ray -> Bool
-hitSphere centre radius ray = discriminant > 0
+hitSphere :: Vector -> Double -> Ray -> Double
+hitSphere centre radius ray = if discriminant < 0
+    then -1 
+    else ((-b) - sqrt(discriminant)) / (2 * a)
     where discriminant = b * b - 4 * a * c
           oc = orig ray - centre
           a = dot (dir ray) (dir ray)
