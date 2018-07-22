@@ -8,3 +8,4 @@ data Ray = Ray { orig :: Vector
 
 point :: Ray -> Double -> Vector
 point ray distance = orig ray + scale (dir ray) distance
+{-# INLINE point #-}

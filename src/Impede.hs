@@ -44,7 +44,7 @@ renderPixel conf (Z :. i :. j) = getColour $ Ray (origin conf) direction
 toImage :: Array V DIM2 Colour -> Image PixelRGB8
 toImage a = generateImage gen width height
     where Z :. width :. height = R.extent a
-          gen x y = pixel $ a ! (Z :. x :. y)
+          gen x y = pixel $ a ! (Z :. x :. (height - y- 1))
           {-# INLINE gen #-}
 
 getColour :: Ray -> Colour
@@ -52,7 +52,7 @@ getColour ray = if t > 0
     then scaleColour (Colour (x n + 1) (y n + 1) (z n + 1)) 0.5
     else scaleColour (Colour 1 1 1) (1 - t_) + scaleColour (Colour 0.5 0.7 1) t_
     where t = hitSphere (Vector 0 0 (-1)) 0.5 ray 
-          n = unitVector (point ray t) - Vector 0 0 (-1)
+          n = unitVector (point ray t - Vector 0 0 (-1))
           t_ = 0.5 * (y unitDir + 1)
           unitDir = unitVector (dir ray)
 
