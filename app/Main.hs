@@ -8,10 +8,10 @@ main :: IO ()
 main = do
   let sceneConfig = SceneConfig { width = 4096
                                 , height = 2048
-                                , lowerLeft = Vector (-2) (-1) (-1)
-                                , horizontal = Vector 4 0 0
-                                , vertical = Vector 0 2 0
-                                , origin = Vector 0 0 0
+                                , camera = Camera (Vector (-2) (-1) (-1))
+                                                  (Vector 4 0 0) 
+                                                  (Vector 0 2 0) 
+                                                  (Vector 0 0 0)
                                 , world = ShapeList [
                                             SphereShape (Sphere (Vector 0 0 (-1)) 0.5), 
                                             SphereShape (Sphere (Vector 0 (-100.5) (-1)) 100)

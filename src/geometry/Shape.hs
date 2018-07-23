@@ -7,7 +7,9 @@ import Data.Maybe
 
 --------- Shapes ---------
 
-data Shape = ListShape (ShapeList) | SphereShape (Sphere) deriving (Show)
+data Shape = ListShape (ShapeList) 
+           | SphereShape (Sphere) 
+             deriving (Show)
 
 data ShapeList = ShapeList { shapes :: [Shape] 
                            } deriving Show
@@ -35,8 +37,8 @@ class Hittable a where
     hit :: Ray -> (Double, Double) -> a -> Maybe (Hit)
 
 instance Hittable Shape where
-    hit ray (tMin, tMax) (SphereShape shape) = hit ray (tMin, tMax) shape
     hit ray (tMin, tMax) (ListShape shape) = hit ray (tMin, tMax) shape
+    hit ray (tMin, tMax) (SphereShape shape) = hit ray (tMin, tMax) shape
 
 instance Hittable ShapeList where
     hit ray (tMin, tMax) list = if length hits > 0

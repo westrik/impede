@@ -29,6 +29,7 @@ library:
   - src
   - src/geometry
   - src/output
+  - src/camera
 
 executables:
   impede:

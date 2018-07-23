@@ -2,6 +2,7 @@
 
 module Impede
     ( Vector (..)
+    , Camera (..)
     , SceneConfig (..)
     , Shape (..)
     , ShapeList (..)
@@ -19,6 +20,7 @@ import qualified Data.Array.Repa     as R
 import Data.Array.Repa.Repr.Vector
 import Data.Maybe
 
+import Camera
 import Vector
 import Ray
 import Colour
@@ -26,10 +28,7 @@ import Shape
 
 data SceneConfig = SceneConfig { width :: Int
                                , height :: Int
-                               , lowerLeft :: Vector
-                               , horizontal :: Vector
-                               , vertical :: Vector
-                               , origin :: Vector
+                               , camera :: Camera
                                , world :: ShapeList
                                } deriving (Show)  
 
@@ -42,9 +41,8 @@ renderScene :: SceneConfig -> Array D DIM2 Colour
 renderScene conf = R.fromFunction (Z :. width conf :. height conf) (renderPixel conf)
 
 renderPixel :: SceneConfig -> DIM2 -> Colour
-renderPixel conf (Z :. i :. j) = getColour (Ray (origin conf) direction) (world conf)
-    where direction = lowerLeft conf + scale (horizontal conf) u + scale (vertical conf) v
-          u = fromIntegral i / fromIntegral (width conf)
+renderPixel conf (Z :. i :. j) = getColour (getRay (camera conf) u v) (world conf)
+    where u = fromIntegral i / fromIntegral (width conf)
           v = fromIntegral j / fromIntegral (height conf)
 
 toImage :: Array V DIM2 Colour -> Image PixelRGB8
