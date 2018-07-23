@@ -19,6 +19,7 @@ import qualified Codec.Picture.Types as M
 import qualified Data.Array.Repa     as R
 import Data.Array.Repa.Repr.Vector
 import Data.Maybe
+import System.Random
 
 import Camera
 import Vector
@@ -30,20 +31,25 @@ data SceneConfig = SceneConfig { width :: Int
                                , height :: Int
                                , camera :: Camera
                                , world :: ShapeList
+                               , iterations :: Int
                                } deriving (Show)  
 
 render :: SceneConfig -> IO (DynamicImage)
 render conf = do
-    renderedScene <- R.computeP $ renderScene conf
+    gen <- newStdGen
+    renderedScene <- R.computeP $ renderScene conf $ zip (seeds gen) (seeds gen)
     return $ ImageRGB8 $ toImage renderedScene
+    where seeds g = (take (iterations conf) $ randoms g)
 
-renderScene :: SceneConfig -> Array D DIM2 Colour
-renderScene conf = R.fromFunction (Z :. width conf :. height conf) (renderPixel conf)
+renderScene :: SceneConfig -> [(Double, Double)] -> Array D DIM2 Colour
+renderScene conf randomPairs = R.fromFunction (Z :. width conf :. height conf) 
+                                              (renderPixel conf randomPairs)
 
-renderPixel :: SceneConfig -> DIM2 -> Colour
-renderPixel conf (Z :. i :. j) = getColour (getRay (camera conf) u v) (world conf)
-    where u = fromIntegral i / fromIntegral (width conf)
-          v = fromIntegral j / fromIntegral (height conf)
+renderPixel :: SceneConfig -> [(Double, Double)] -> DIM2 -> Colour
+renderPixel conf randomPairs (Z :. i :. j) = averageColours (map renderIter randomPairs)
+    where renderIter (s, t) = getColour (getRay (camera conf) (u s) (v t)) (world conf)
+          u r = (fromIntegral i + r) / fromIntegral (width conf)
+          v r = (fromIntegral j + r) / fromIntegral (height conf)
 
 toImage :: Array V DIM2 Colour -> Image PixelRGB8
 toImage a = generateImage gen width height

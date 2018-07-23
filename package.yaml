@@ -23,6 +23,7 @@ dependencies:
 - JuicyPixels
 - repa
 - vector
+- random
 
 library:
   source-dirs: 

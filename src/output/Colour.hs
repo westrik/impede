@@ -22,3 +22,8 @@ pixel a = PixelRGB8 (round $ r a * 255) (round $ g a * 255) (round $ b a * 255)
 scaleColour :: Colour -> Double -> Colour
 scaleColour col fac = Colour (r col * fac) (g col * fac) (b col * fac)
 {-# INLINE scaleColour #-}
+
+averageColours :: [Colour] -> Colour
+averageColours list = Colour (sum (map r list) / (fromIntegral $ length list))
+                             (sum (map g list) / (fromIntegral $ length list))
+                             (sum (map b list) / (fromIntegral $ length list))
