@@ -12,6 +12,10 @@ main = do
                                 , horizontal = Vector 4 0 0
                                 , vertical = Vector 0 2 0
                                 , origin = Vector 0 0 0
+                                , world = ShapeList [
+                                            SphereShape (Sphere (Vector 0 0 (-1)) 0.5), 
+                                            SphereShape (Sphere (Vector 0 (-100.5) (-1)) 100)
+                                          ]
                                 }
   [path] <- getArgs
   image <- render sceneConfig

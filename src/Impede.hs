@@ -3,6 +3,9 @@
 module Impede
     ( Vector (..)
     , SceneConfig (..)
+    , Shape (..)
+    , ShapeList (..)
+    , Sphere (..)
     
     , render
     ) where
@@ -14,10 +17,12 @@ import Data.Array.Repa (Array, DIM1, DIM2, D, Z (..), (:.)(..), (!))
 import qualified Codec.Picture.Types as M
 import qualified Data.Array.Repa     as R
 import Data.Array.Repa.Repr.Vector
+import Data.Maybe
 
 import Vector
 import Ray
 import Colour
+import Shape
 
 data SceneConfig = SceneConfig { width :: Int
                                , height :: Int
@@ -25,6 +30,7 @@ data SceneConfig = SceneConfig { width :: Int
                                , horizontal :: Vector
                                , vertical :: Vector
                                , origin :: Vector
+                               , world :: ShapeList
                                } deriving (Show)  
 
 render :: SceneConfig -> IO (DynamicImage)
@@ -36,7 +42,7 @@ renderScene :: SceneConfig -> Array D DIM2 Colour
 renderScene conf = R.fromFunction (Z :. width conf :. height conf) (renderPixel conf)
 
 renderPixel :: SceneConfig -> DIM2 -> Colour
-renderPixel conf (Z :. i :. j) = getColour $ Ray (origin conf) direction
+renderPixel conf (Z :. i :. j) = getColour (Ray (origin conf) direction) (world conf)
     where direction = lowerLeft conf + scale (horizontal conf) u + scale (vertical conf) v
           u = fromIntegral i / fromIntegral (width conf)
           v = fromIntegral j / fromIntegral (height conf)
@@ -47,21 +53,17 @@ toImage a = generateImage gen width height
           gen x y = pixel $ a ! (Z :. x :. (height - y- 1))
           {-# INLINE gen #-}
 
-getColour :: Ray -> Colour
-getColour ray = if t > 0
+getColour :: Ray -> ShapeList -> Colour
+getColour ray world = if isJust hitRecord
     then scaleColour (Colour (x n + 1) (y n + 1) (z n + 1)) 0.5
-    else scaleColour (Colour 1 1 1) (1 - t_) + scaleColour (Colour 0.5 0.7 1) t_
-    where t = hitSphere (Vector 0 0 (-1)) 0.5 ray 
-          n = unitVector (point ray t - Vector 0 0 (-1))
-          t_ = 0.5 * (y unitDir + 1)
+    else scaleColour (Colour 1 1 1) (1 - tMiss) + scaleColour (Colour 0.5 0.7 1) tMiss
+    where hitRecord = hit ray (0, maxFloat (0 :: Double)) world 
+          tMiss = 0.5 * (y unitDir + 1)
           unitDir = unitVector (dir ray)
-
-hitSphere :: Vector -> Double -> Ray -> Double
-hitSphere centre radius ray = if discriminant < 0
-    then -1 
-    else ((-b) - sqrt(discriminant)) / (2 * a)
-    where discriminant = b * b - 4 * a * c
-          oc = orig ray - centre
-          a = dot (dir ray) (dir ray)
-          b = 2 * dot oc (dir ray)
-          c = dot oc oc - radius * radius
+          n = normal $ fromJust hitRecord
+          maxFloat a = encodeFloat m n where
+              b = floatRadix a
+              e = floatDigits a
+              (_, e') = floatRange a
+              m = b ^ e - 1
+              n = e' - e
