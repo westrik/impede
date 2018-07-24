@@ -25,6 +25,8 @@ import Ray
 import Colour
 import Shape
 
+type Render = V.Vector (V.Vector Colour)
+
 data SceneConfig = SceneConfig { width :: Int
                                , height :: Int
                                , camera :: Camera
@@ -37,19 +39,22 @@ render conf = do
     renderedScene <- renderScene conf 
     return $ ImageRGB8 $ toImage renderedScene
 
-renderScene :: SceneConfig -> IO (V.Vector Colour)
-renderScene conf = V.generateM (width conf) (renderPixel conf) 
+renderScene :: SceneConfig -> IO Render
+renderScene conf = V.generateM (width conf) renderLine
+    where renderLine i = V.generateM (height conf) (renderPixel conf i)
 
-renderPixel :: SceneConfig -> Int -> IO (Colour)
-renderPixel conf i = do
+renderPixel :: SceneConfig -> Int -> Int -> IO (Colour)
+renderPixel conf i j = do
     g <- newStdGen
-    return $ getColour (getRay (camera conf) (u $ head . take 1 $ randoms g) (u $ head . take 1 $ randoms g)) (world conf)
+    return $ getColour (getRay (camera conf) (u $ head . take 1 $ randoms g) (v $ head . take 1 $ randoms g)) (world conf)
     where u r = (fromIntegral i + r) / fromIntegral (width conf)
-          -- v = (fromIntegral j) / fromIntegral (height conf)
+          v r = (fromIntegral j + r) / fromIntegral (height conf)
 
-toImage :: V.Vector Colour -> Image PixelRGB8
-toImage a = generateImage gen (length a) 1
-    where gen x _ = pixel $ a V.! x
+toImage :: Render -> Image PixelRGB8
+toImage a = generateImage gen w h
+    where gen x y = pixel $ a V.! x V.! (h - y - 1)
+          w = length a
+          h = length (a V.! 0)
           {-# INLINE gen #-}
 
 getColour :: Ray -> ShapeList -> Colour
