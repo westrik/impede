@@ -6,8 +6,8 @@ import System.Environment (getArgs)
 
 main :: IO ()
 main = do
-  let sceneConfig = SceneConfig { width = 4096
-                                , height = 2048
+  let sceneConfig = SceneConfig { width = 200
+                                , height = 100
                                 , camera = Camera (Vector (-2) (-1) (-1))
                                                   (Vector 4 0 0) 
                                                   (Vector 0 2 0) 
