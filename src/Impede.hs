@@ -19,13 +19,16 @@ import Data.Maybe
 import qualified Data.Vector as V
 import System.Random
 
+
+import Control.DeepSeq (NFData(..))
+import Control.Parallel.Strategies
+import qualified Data.Vector.Generic as VG
+
 import Camera
 import Vector
 import Ray
 import Colour
 import Shape
-
-type Render = V.Vector (V.Vector Colour)
 
 data SceneConfig = SceneConfig { width :: Int
                                , height :: Int
@@ -37,27 +40,27 @@ data SceneConfig = SceneConfig { width :: Int
 render :: SceneConfig -> IO (DynamicImage)
 render conf = do
     renderedScene <- renderScene conf 
-    return $ ImageRGB8 $ toImage renderedScene
+    return $ ImageRGB8 $ toImage renderedScene conf
 
-renderScene :: SceneConfig -> IO Render
-renderScene conf = V.generateM (width conf) renderLine
-    where renderLine i = V.generateM (height conf) (renderPixel conf i)
+renderScene :: SceneConfig -> IO [Colour]
+renderScene conf = sequence ((map (renderPixel conf) [0 .. width conf * height conf - 1])
+                                `using` parList rdeepseq)
 
-renderPixel :: SceneConfig -> Int -> Int -> IO (Colour)
-renderPixel conf i j = do
+renderPixel :: SceneConfig -> Int -> IO (Colour)
+renderPixel conf i = do
     gen <- newStdGen
     return $ averageColours (map renderIter $ randomPairs gen)
     where renderIter (s, t) = getColour (getRay (camera conf) (u s) (v t)) (world conf)
-          u r = (fromIntegral i + r) / fromIntegral (width conf)
-          v r = (fromIntegral j + r) / fromIntegral (height conf)
+          u r = (fromIntegral (i `mod` (width conf)) + r) / fromIntegral (width conf)
+          v r = (fromIntegral (i `div` (height conf)) + r) / fromIntegral (height conf)
           randomPairs g = zip (take (iterations conf) $ randoms g)
                               (take (iterations conf) $ randoms g)
 
-toImage :: Render -> Image PixelRGB8
-toImage a = generateImage gen w h
-    where gen x y = pixel $ a V.! x V.! (h - y - 1)
-          w = length a
-          h = length (a V.! 0)
+toImage :: [Colour] -> SceneConfig -> Image PixelRGB8
+toImage a conf = generateImage gen w h
+    where gen x y = pixel $ (V.fromList a) V.! (y * h + x)
+          w = width conf
+          h = height conf
           {-# INLINE gen #-}
 
 getColour :: Ray -> ShapeList -> Colour

@@ -24,6 +24,8 @@ dependencies:
 - repa
 - vector
 - random
+- parallel
+- deepseq
 
 library:
   source-dirs: 

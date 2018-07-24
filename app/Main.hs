@@ -16,7 +16,7 @@ main = do
                                             SphereShape (Sphere (Vector 0 0 (-1)) 0.5), 
                                             SphereShape (Sphere (Vector 0 (-100.5) (-1)) 100)
                                           ]
-                                , iterations = 100
+                                , iterations = 1
                                 }
   [path] <- getArgs
   image <- render sceneConfig
