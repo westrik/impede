@@ -45,10 +45,13 @@ renderScene conf = V.generateM (width conf) renderLine
 
 renderPixel :: SceneConfig -> Int -> Int -> IO (Colour)
 renderPixel conf i j = do
-    g <- newStdGen
-    return $ getColour (getRay (camera conf) (u $ head . take 1 $ randoms g) (v $ head . take 1 $ randoms g)) (world conf)
-    where u r = (fromIntegral i + r) / fromIntegral (width conf)
+    gen <- newStdGen
+    return $ averageColours (map renderIter $ randomPairs gen)
+    where renderIter (s, t) = getColour (getRay (camera conf) (u s) (v t)) (world conf)
+          u r = (fromIntegral i + r) / fromIntegral (width conf)
           v r = (fromIntegral j + r) / fromIntegral (height conf)
+          randomPairs g = zip (take (iterations conf) $ randoms g)
+                              (take (iterations conf) $ randoms g)
 
 toImage :: Render -> Image PixelRGB8
 toImage a = generateImage gen w h
