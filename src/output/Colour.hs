@@ -23,7 +23,8 @@ scaleColour :: Colour -> Double -> Colour
 scaleColour col fac = Colour (r col * fac) (g col * fac) (b col * fac)
 {-# INLINE scaleColour #-}
 
+-- sqrt is for an approximate gamma adjustment
 averageColours :: [Colour] -> Colour
-averageColours list = Colour (sum (map r list) / (fromIntegral $ length list))
-                             (sum (map g list) / (fromIntegral $ length list))
-                             (sum (map b list) / (fromIntegral $ length list))
+averageColours list = Colour (sqrt (sum (map r list) / (fromIntegral $ length list)))
+                             (sqrt (sum (map g list) / (fromIntegral $ length list)))
+                             (sqrt (sum (map b list) / (fromIntegral $ length list)))

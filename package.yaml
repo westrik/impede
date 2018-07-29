@@ -21,7 +21,6 @@ description:         Please see the README on GitHub at <https://github.com/west
 dependencies:
 - base >= 4.7 && < 5
 - JuicyPixels
-- repa
 - vector
 - random
 - parallel-io
@@ -40,13 +39,7 @@ executables:
     ghc-options:
     - -threaded
     - -rtsopts
-    - -with-rtsopts=-N
-    - -fllvm
-    - -optlo-O3 
-    - -Odph 
-    - -fno-liberate-case
-    - -funfolding-use-threshold100 
-    - -funfolding-keeness-factor100
+    - -O1
     - -Wall 
     - -Werror
     dependencies:
@@ -59,7 +52,6 @@ tests:
     ghc-options:
     - -threaded
     - -rtsopts
-    - -with-rtsopts=-N
     - -fllvm
     - -Wall 
     - -Werror

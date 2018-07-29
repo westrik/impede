@@ -38,8 +38,13 @@ render conf = do
     renderedScene <- renderScene conf 
     return $ ImageRGB8 $ toImage renderedScene conf
 
+-- TODO: this isn't parallelizing as much as I want. maybe try bundling coords along with colour 
+--       and use parallelInterleaved
 renderScene :: SceneConfig -> IO [Colour]
-renderScene conf = parallel $ (map (renderPixel conf) [0 .. width conf * height conf - 1])
+renderScene conf = do
+    scene <- parallel $ (map (renderPixel conf) [0 .. width conf * height conf - 1])
+    stopGlobalPool
+    return scene
 
 renderPixel :: SceneConfig -> Int -> IO (Colour)
 renderPixel conf i = do
