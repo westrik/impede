@@ -18,11 +18,7 @@ import qualified Codec.Picture.Types as M
 import Data.Maybe
 import qualified Data.Vector as V
 import System.Random
-
-
-import Control.DeepSeq (NFData(..))
-import Control.Parallel.Strategies
-import qualified Data.Vector.Generic as VG
+import Control.Concurrent.ParallelIO.Global
 
 import Camera
 import Vector
@@ -43,8 +39,7 @@ render conf = do
     return $ ImageRGB8 $ toImage renderedScene conf
 
 renderScene :: SceneConfig -> IO [Colour]
-renderScene conf = sequence ((map (renderPixel conf) [0 .. width conf * height conf - 1])
-                                `using` parList rdeepseq)
+renderScene conf = parallel $ (map (renderPixel conf) [0 .. width conf * height conf - 1])
 
 renderPixel :: SceneConfig -> Int -> IO (Colour)
 renderPixel conf i = do
@@ -52,13 +47,13 @@ renderPixel conf i = do
     return $ averageColours (map renderIter $ randomPairs gen)
     where renderIter (s, t) = getColour (getRay (camera conf) (u s) (v t)) (world conf)
           u r = (fromIntegral (i `mod` (width conf)) + r) / fromIntegral (width conf)
-          v r = (fromIntegral (i `div` (height conf)) + r) / fromIntegral (height conf)
+          v r = (fromIntegral (i `div` (width conf)) + r) / fromIntegral (height conf)
           randomPairs g = zip (take (iterations conf) $ randoms g)
                               (take (iterations conf) $ randoms g)
 
 toImage :: [Colour] -> SceneConfig -> Image PixelRGB8
 toImage a conf = generateImage gen w h
-    where gen x y = pixel $ (V.fromList a) V.! (y * h + x)
+    where gen x y = pixel $ (V.fromList a) V.! ((h-y-1) * w + x)
           w = width conf
           h = height conf
           {-# INLINE gen #-}
